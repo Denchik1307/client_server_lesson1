@@ -34,13 +34,11 @@ public class ServerWindow extends JFrame implements ServerView {
     }
 
     private void createPanel() {
-        JPanel panel = new JPanel(new GridLayout(1, 2));
-
-        btnStart.addActionListener(e -> e -> serverController.start());
-
-        btnStop.addActionListener(e -> serverController.stop());
-
         add(log);
+
+        JPanel panel = new JPanel(new GridLayout(1, 2));
+        btnStart.addActionListener(e -> serverController.start());
+        btnStop.addActionListener(e -> serverController.stop());
         panel.add(btnStart);
         panel.add(btnStop);
 

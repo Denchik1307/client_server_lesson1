@@ -1,13 +1,16 @@
 package chat;
 
-import chat.client.ClientWindow;
-import chat.server.ServerWindow;
+import chat.client.controller.ClientController;
+import chat.client.view.ClientView;
+import chat.server.controller.ServerController;
+import chat.server.view.ServerWindow;
 
 public class Main {
     public static void main(String[] args) {
 
-        ServerWindow serverWindow = new ServerWindow();
-        new ClientWindow(serverWindow);
-        new ClientWindow(serverWindow);
+        ServerController serverController = new ServerController(new ServerWindow("Work"));
+
+        new ClientController(new ClientView(), serverController);
+        new ClientController(new ClientView(), serverController);
     }
 }

@@ -12,7 +12,7 @@ public class ServerWindow extends JFrame implements ServerView {
 
     private ServerController serverController;
 
-    private String nameChat;
+    private final String nameChat;
     private final String TITLE = "Server for chat";
     private final JButton btnStart = new JButton("Start");
     private final JButton btnStop = new JButton("Stop");
@@ -49,11 +49,6 @@ public class ServerWindow extends JFrame implements ServerView {
     @Override
     public void showMessage(String message) {
         log.append(message);
-    }
-
-    @Override
-    public void setServerController(ServerController serverController) {
-        this.serverController = serverController;
     }
 
     @Override

@@ -10,8 +10,8 @@ public class ClientController {
     private ClientView clientView;
     private ServerController serverController;
 
-    public ClientController(ClientView clientView, ServerController serverController) {
-        this.clientView = clientView;
+    public ClientController(ServerController serverController) {
+        this.clientView = new ClientView();
         this.serverController = serverController;
         clientView.setClientController(this);
     }

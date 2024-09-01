@@ -10,7 +10,7 @@ public class Main {
 
         ServerController serverController = new ServerController(new ServerWindow("Work"));
 
-        new ClientController(new ClientView(), serverController);
-        new ClientController(new ClientView(), serverController);
+        new ClientController(serverController);
+        new ClientController(serverController);
     }
 }

@@ -11,7 +11,7 @@ public class ClientWindow extends JFrame {
     public static final int HEIGHT = 400;
 
     private final ServerWindow server;
-    private boolean isConnected;
+    private boolean isUserConnected = false;
 
     private String userName;
 
@@ -47,7 +47,7 @@ public class ClientWindow extends JFrame {
     private void connectToServer() {
         if (server.isUserConnected(this)) {
             String log = server.getLog();
-            isConnected = true;
+            isUserConnected = true;
             userName = textFieldLogin.getText();
             connectionPanel.setVisible(false);
             if (log != null) appendLog(log);
@@ -59,16 +59,16 @@ public class ClientWindow extends JFrame {
     }
 
     public void disconnectFromServer() {
-        if (isConnected) {
+        if (isUserConnected) {
             this.connectionPanel.setVisible(true);
-            this.isConnected = false;
+            this.isUserConnected = false;
             this.server.disconnectUser(this);
             appendLog("Connection closed!");
         }
     }
 
     public void sendMessage() {
-        if (isConnected && !messageField.getText().isEmpty()) {
+        if (isUserConnected && !messageField.getText().isEmpty()) {
             server.message(userName + ": " + messageField.getText());
         } else {
             appendLog("Not connection");

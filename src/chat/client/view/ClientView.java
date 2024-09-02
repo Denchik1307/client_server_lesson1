@@ -2,7 +2,10 @@ package chat.client.view;
 
 import chat.client.controller.ClientController;
 
-public class ClientView {
-    public void setClientController(ClientController clientController) {
-    }
+public interface ClientView {
+    void setClientController(ClientController clientController);
+
+    void showMessage(String text);
+
+    void disconnectFromServer();
 }

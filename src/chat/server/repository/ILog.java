@@ -1,6 +1,7 @@
 package chat.server.repository;
 
-public interface ILog<String> {
+public interface ILog {
     String read();
+
     void write(String text);
 }

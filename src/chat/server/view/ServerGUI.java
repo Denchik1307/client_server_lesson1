@@ -1,13 +1,12 @@
 package chat.server.view;
 
+import chat.client.ClientGUI;
 import chat.server.controller.ServerController;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-public class ServerWindow extends JFrame implements ServerView {
+public class ServerGUI extends JFrame implements ServerView {
     private final int WIDTH = 400, HEIGHT = 400;
 
     private ServerController serverController;
@@ -16,9 +15,9 @@ public class ServerWindow extends JFrame implements ServerView {
     private final String TITLE = "Server for chat";
     private final JButton btnStart = new JButton("Start");
     private final JButton btnStop = new JButton("Stop");
-    private final JTextArea log = new JTextArea();
+    private final JTextArea logArea = new JTextArea();
 
-    public ServerWindow(String nameChat) {
+    public ServerGUI(String nameChat) {
         this.nameChat = nameChat;
         this.setSize(WIDTH, HEIGHT);
         this.setResizable(false);
@@ -29,12 +28,9 @@ public class ServerWindow extends JFrame implements ServerView {
         setVisible(true);
     }
 
-    private void appendLog(String text) {
-        log.append(text + "\n");
-    }
 
     private void createPanel() {
-        add(log);
+        add(logArea);
 
         JPanel panel = new JPanel(new GridLayout(1, 2));
         btnStart.addActionListener(e -> serverController.start());
@@ -46,13 +42,35 @@ public class ServerWindow extends JFrame implements ServerView {
     }
 
 
+
+    public boolean isUserConnected(ClientGUI clientGUI) {
+        return false;
+    }
+
+    public void disconnectUser(ClientGUI clientGUI) {
+    }
+
+    public String getLogArea() {
+        return "";
+    }
+
+    public void message(String s) {
+
+    }
+
     @Override
     public void showMessage(String message) {
-        log.append(message);
+        logArea.append(message);
+    }
+
+    @Override
+    public void setServerController(ServerController serverController) {
+        this.serverController = serverController;
     }
 
     @Override
     public String getNameChat() {
         return this.nameChat;
     }
+
 }

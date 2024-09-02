@@ -1,16 +1,19 @@
 package chat.client;
 
-import chat.server.view.ServerWindow;
+import chat.client.controller.ClientController;
+import chat.client.view.ClientView;
+import chat.server.view.ServerGUI;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class ClientWindow extends JFrame {
+public class ClientGUI extends JFrame implements ClientView {
     public static final int WIDTH = 400;
     public static final int HEIGHT = 400;
 
-    private final ServerWindow server;
+    private final ServerGUI server;
+    private ClientController clientController;
     private boolean isUserConnected = false;
 
     private String userName;
@@ -22,13 +25,14 @@ public class ClientWindow extends JFrame {
     private JTextField textFieldLogin;
     private JPasswordField textFieldPassword;
     private JButton buttonSend;
+    private JButton buttonUsers;
 
     private JPanel panelMessageLog;
     private JTextField messageField;
     private JButton buttonConnect;
     private JTextArea areaLog = new JTextArea();
 
-    public ClientWindow(ServerWindow server) {
+    public ClientGUI(ServerGUI server) {
         this.server = server;
 
         setSize(WIDTH, HEIGHT);
@@ -40,13 +44,9 @@ public class ClientWindow extends JFrame {
         setVisible(true);
     }
 
-    public void answer(String text) {
-        appendLog(text);
-    }
-
     private void connectToServer() {
         if (server.isUserConnected(this)) {
-            String log = server.getLog();
+            String log = server.getLogArea();
             isUserConnected = true;
             userName = textFieldLogin.getText();
             connectionPanel.setVisible(false);
@@ -57,6 +57,7 @@ public class ClientWindow extends JFrame {
             appendLog("Connection filed");
         }
     }
+
 
     public void disconnectFromServer() {
         if (isUserConnected) {
@@ -76,6 +77,12 @@ public class ClientWindow extends JFrame {
         messageField.setText("");
     }
 
+    private void showUsersOnline() {
+        if (isUserConnected) {
+//            server.
+        }
+    }
+
     private void appendLog(String text) {
         areaLog.append(text + "\n");
     }
@@ -87,10 +94,10 @@ public class ClientWindow extends JFrame {
     }
 
     private Component createConnectionPanel() {
-        JPanel left = new JPanel(new GridLayout(2,1));
-        JPanel center = new JPanel(new GridLayout(2,1));
-        JPanel right = new JPanel(new GridLayout(1,1));
-        connectionPanel = new JPanel(new GridLayout(1,2));
+        JPanel left = new JPanel(new GridLayout(2, 1));
+        JPanel center = new JPanel(new GridLayout(2, 1));
+        JPanel right = new JPanel(new GridLayout(1, 1));
+        connectionPanel = new JPanel(new GridLayout(1, 2));
 
         textFieldIPaddress = new JTextField("IP address");
         textFieldPort = new JTextField("port");
@@ -110,9 +117,9 @@ public class ClientWindow extends JFrame {
         center.add(textFieldPort);
         center.add(textFieldPassword);
         right.add(buttonConnect);
-        connectionPanel.add(left,BorderLayout.WEST);
-        connectionPanel.add(center,BorderLayout.CENTER);
-        connectionPanel.add(right,BorderLayout.EAST);
+        connectionPanel.add(left, BorderLayout.WEST);
+        connectionPanel.add(center, BorderLayout.CENTER);
+        connectionPanel.add(right, BorderLayout.EAST);
 
         return connectionPanel;
     }
@@ -135,6 +142,15 @@ public class ClientWindow extends JFrame {
                 sendMessage();
             }
         });
+
+        buttonUsers = new JButton("Users online");
+        buttonUsers.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showUsersOnline();
+            }
+
+        });
         panelMessageLog.add(messageField);
         panelMessageLog.add(buttonSend, BorderLayout.EAST);
         return panelMessageLog;
@@ -146,5 +162,15 @@ public class ClientWindow extends JFrame {
             disconnectFromServer();
         }
         super.processWindowEvent(e);
+    }
+
+    @Override
+    public void setClientController(ClientController clientController) {
+        this.clientController = clientController;
+    }
+
+    @Override
+    public void showMessage(String text) {
+        this.server.showMessage(text);
     }
 }

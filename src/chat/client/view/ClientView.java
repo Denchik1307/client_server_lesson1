@@ -10,4 +10,6 @@ public interface ClientView {
     void disconnectFromServer();
 
     void connectToServer();
+
+    String getUserName();
 }

@@ -3,6 +3,7 @@ package chat.server.controller;
 import chat.client.controller.ClientController;
 import chat.server.repository.ILog;
 import chat.server.repository.LogFile;
+import chat.server.view.ServerGUI;
 import chat.server.view.ServerView;
 
 import java.util.ArrayList;
@@ -10,16 +11,19 @@ import java.util.List;
 
 public class ServerController {
 
-    private boolean isWork = false;
-    private ServerView serverView;
-    private ILog log;
-    private List<ClientController> listClientControllers;
+    private final ServerView serverView;
 
-    public ServerController(ServerView serverView) {
-        this.serverView = serverView;
+    private String nameChat;
+    public boolean isWork = false;
+    public ILog log;
+    private final List<ClientController> listClientControllers;
+
+    public ServerController(String nameChat) {
         this.log = new LogFile();
         this.listClientControllers = new ArrayList<>();
-        serverView.setServerController(this);
+        this.nameChat = nameChat;
+        this.serverView = new ServerGUI(this);
+        this.serverView.setServerController(this);
     }
 
     public void disconnectUser(ClientController clientController) {
@@ -27,39 +31,46 @@ public class ServerController {
     }
 
     public void connectUser(ClientController clientController) {
-        clientController.connectToServer();
+//        clientController.connectToServer();
         this.listClientControllers.add(clientController);
-        showMessageInWindow(clientController.getUser() + "connected");
+        showMessageInWindow(clientController.getUserName() + " connected");
     }
 
     public List<ClientController> getUsersOnline() {
         return listClientControllers;
     }
 
-    private void showMessageInWindow(String text) {
+    public void showMessageInWindow(String text) {
         this.serverView.showMessage(text);
         this.log.write(text);
     }
 
     public void start() {
-        if (!isWork){
-            showMessageInWindow("Server isn't run");
+        if (isWork){
+            showMessageInWindow("Server still running");
         } else {
+            showMessageInWindow("Server run");
             isWork = true;
-            showMessageInWindow("Server running");
         }
     }
 
     public void stop() {
-        if (!isWork){
-            showMessageInWindow("Server isn't run");
-        } else {
+        if (isWork){
             isWork = false;
             while (!listClientControllers.isEmpty()){
-                disconnectUser(listClientControllers.get(0));
+                disconnectUser(listClientControllers.getLast());
             }
-            showMessageInWindow("Server stopped");
+            showMessageInWindow("Server stop");
+        } else {
+            showMessageInWindow("Server isn't run");
         }
     }
 
+    public void addUser(ClientController clientController) {
+        listClientControllers.add(clientController);
+    }
+
+    public String getNameChat() {
+        return nameChat;
+    }
 }

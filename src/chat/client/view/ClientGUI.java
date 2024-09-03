@@ -1,6 +1,7 @@
 package chat.client.view;
 
 import chat.client.controller.ClientController;
+import chat.server.controller.ServerController;
 import chat.server.view.ServerGUI;
 
 import javax.swing.*;
@@ -11,7 +12,7 @@ public class ClientGUI extends JFrame implements ClientView {
     public static final int WIDTH = 400;
     public static final int HEIGHT = 400;
 
-    private final ServerGUI server;
+    private final ServerController serverController;
     private ClientController clientController;
     private boolean isUserConnected = false;
 
@@ -31,8 +32,8 @@ public class ClientGUI extends JFrame implements ClientView {
     private JButton buttonConnect;
     private JTextArea areaLog = new JTextArea();
 
-    public ClientGUI(ServerGUI server) {
-        this.server = server;
+    public ClientGUI(ServerController serverController) {
+        this.serverController = serverController;
 
         setSize(WIDTH, HEIGHT);
         setResizable(false);
@@ -44,8 +45,8 @@ public class ClientGUI extends JFrame implements ClientView {
     }
 
     public void connectToServer() {
-        if (server.isUserConnected(this)) {
-            String log = server.getLogArea();
+        if (serverController.isWork) {
+            String log = serverController.log.read();
             isUserConnected = true;
             userName = textFieldLogin.getText();
             connectionPanel.setVisible(false);
@@ -62,14 +63,14 @@ public class ClientGUI extends JFrame implements ClientView {
         if (isUserConnected) {
             this.connectionPanel.setVisible(true);
             this.isUserConnected = false;
-            this.server.disconnectUser(this);
+            this.serverController.disconnectUser(clientController);
             appendLog("Connection closed!");
         }
     }
 
     public void sendMessage() {
         if (isUserConnected && !messageField.getText().isEmpty()) {
-            server.message(userName + ": " + messageField.getText());
+            serverController.showMessageInWindow(userName + ": " + messageField.getText());
         } else {
             appendLog("Not connection");
         }
@@ -126,14 +127,7 @@ public class ClientGUI extends JFrame implements ClientView {
     private Component createPanelSendMessage() {
         panelMessageLog = new JPanel(new BorderLayout());
         messageField = new JTextField();
-        messageField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyTyped(KeyEvent keyEvent) {
-                if (keyEvent.getKeyChar() == '\n') {
-                    sendMessage();
-                }
-            }
-        });
+        messageField.addKeyListener(new MyKeyAdapter());
         buttonSend = new JButton("send");
         buttonSend.addActionListener(actionEvent -> sendMessage());
 
@@ -159,6 +153,20 @@ public class ClientGUI extends JFrame implements ClientView {
 
     @Override
     public void showMessage(String text) {
-        this.server.showMessage(text);
+        this.serverController.showMessageInWindow(text);
+    }
+
+    @Override
+    public String getUserName() {
+        return userName;
+    }
+
+    private class MyKeyAdapter extends KeyAdapter {
+        @Override
+        public void keyTyped(KeyEvent keyEvent) {
+            if (keyEvent.getKeyChar() == '\n') {
+                sendMessage();
+            }
+        }
     }
 }

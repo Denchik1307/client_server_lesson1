@@ -6,48 +6,44 @@ import chat.server.controller.ServerController;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClientController {
+public class ClientController implements ClientView {
 
     private static List<String> listUsers = new ArrayList<>();
-    private boolean connected;
-    private ClientView clientView;
+    private boolean isConnected;
     private ServerController serverController;
 
     public ClientController(ServerController serverController) {
         this.serverController = serverController;
-        this.clientView = new ClientView() {
-            @Override
-            public void setClientController(ClientController clientController) {
-
-            }
-
-            @Override
-            public void showMessage(String text) {
-
-            }
-
-            @Override
-            public void disconnectFromServer() {
-
-            }
-        };
     }
 
-    public void disconnectFromServer() {
-        this.serverController.disconnectUser(this);
-    }
-
-    public List<String> getUsers() {
-        return listUsers;
-    }
-
-    public String getUsersOnline(){
+    public String getUsersOnline() {
         StringBuilder users = new StringBuilder();
         serverController.getUsersOnline().forEach(user -> users.append(user).append("\n"));
         return users.toString();
     }
 
+    @Override
     public void connectToServer() {
+
         this.serverController.connectUser(this);
+    }
+
+    @Override
+    public void disconnectFromServer() {
+        this.serverController.disconnectUser(this);
+    }
+
+    @Override
+    public void setClientController(ClientView clientView) {
+        clientView.setClientController(this);
+    }
+
+    @Override
+    public void showMessage(String text) {
+
+    }
+
+    public String getUser() {
+        return "";
     }
 }

@@ -13,16 +13,14 @@ public class ServerController {
     private boolean isWork = false;
     private ServerView serverView;
     private ILog log;
-
-
     private List<ClientController> listClientControllers;
 
     public ServerController(ServerView serverView) {
         this.serverView = serverView;
         this.log = new LogFile();
         this.listClientControllers = new ArrayList<>();
+        serverView.setServerController(this);
     }
-
 
     public void disconnectUser(ClientController clientController) {
         clientController.disconnectFromServer();
@@ -30,6 +28,8 @@ public class ServerController {
 
     public void connectUser(ClientController clientController) {
         clientController.connectToServer();
+        this.listClientControllers.add(clientController);
+        showMessageInWindow(clientController.getUser() + "connected");
     }
 
     public List<ClientController> getUsersOnline() {
@@ -37,8 +37,8 @@ public class ServerController {
     }
 
     private void showMessageInWindow(String text) {
-        serverView.showMessage(text);
-        log.write(text);
+        this.serverView.showMessage(text);
+        this.log.write(text);
     }
 
     public void start() {
@@ -56,9 +56,10 @@ public class ServerController {
         } else {
             isWork = false;
             while (!listClientControllers.isEmpty()){
-                disconnectUser(listClientControllers.get(listClientControllers.size() - 1));
+                disconnectUser(listClientControllers.get(0));
             }
             showMessageInWindow("Server stopped");
         }
     }
+
 }

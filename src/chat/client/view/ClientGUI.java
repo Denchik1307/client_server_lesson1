@@ -1,7 +1,6 @@
-package chat.client;
+package chat.client.view;
 
 import chat.client.controller.ClientController;
-import chat.client.view.ClientView;
 import chat.server.view.ServerGUI;
 
 import javax.swing.*;
@@ -44,7 +43,7 @@ public class ClientGUI extends JFrame implements ClientView {
         setVisible(true);
     }
 
-    private void connectToServer() {
+    public void connectToServer() {
         if (server.isUserConnected(this)) {
             String log = server.getLogArea();
             isUserConnected = true;
@@ -90,7 +89,7 @@ public class ClientGUI extends JFrame implements ClientView {
     private void createView() {
         add(createConnectionPanel(), BorderLayout.NORTH);
         add(new JScrollPane(areaLog));
-        add(createPanelMessageSend(), BorderLayout.SOUTH);
+        add(createPanelSendMessage(), BorderLayout.SOUTH);
     }
 
     private Component createConnectionPanel() {
@@ -124,7 +123,7 @@ public class ClientGUI extends JFrame implements ClientView {
         return connectionPanel;
     }
 
-    private Component createPanelMessageSend() {
+    private Component createPanelSendMessage() {
         panelMessageLog = new JPanel(new BorderLayout());
         messageField = new JTextField();
         messageField.addKeyListener(new KeyAdapter() {
@@ -136,32 +135,21 @@ public class ClientGUI extends JFrame implements ClientView {
             }
         });
         buttonSend = new JButton("send");
-        buttonSend.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                sendMessage();
-            }
-        });
+        buttonSend.addActionListener(actionEvent -> sendMessage());
 
         buttonUsers = new JButton("Users online");
-        buttonUsers.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showUsersOnline();
-            }
-
-        });
+        buttonUsers.addActionListener(actionEvent -> showUsersOnline());
         panelMessageLog.add(messageField);
         panelMessageLog.add(buttonSend, BorderLayout.EAST);
         return panelMessageLog;
     }
 
     @Override
-    protected void processWindowEvent(WindowEvent e) {
-        if (e.getID() == WindowEvent.WINDOW_CLOSING) {
+    protected void processWindowEvent(WindowEvent windowEvent) {
+        if (windowEvent.getID() == WindowEvent.WINDOW_CLOSING) {
             disconnectFromServer();
         }
-        super.processWindowEvent(e);
+        super.processWindowEvent(windowEvent);
     }
 
     @Override

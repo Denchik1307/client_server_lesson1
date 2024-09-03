@@ -1,6 +1,5 @@
 package chat;
 
-import chat.client.ClientGUI;
 import chat.client.controller.ClientController;
 import chat.server.controller.ServerController;
 import chat.server.view.ServerGUI;

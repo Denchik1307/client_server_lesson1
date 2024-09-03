@@ -1,6 +1,6 @@
 package chat.server.view;
 
-import chat.client.ClientGUI;
+import chat.client.view.ClientGUI;
 import chat.server.controller.ServerController;
 
 import javax.swing.*;

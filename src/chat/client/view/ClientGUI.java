@@ -1,149 +1,98 @@
 package chat.client.view;
 
+
 import chat.client.controller.ClientController;
-import chat.server.controller.ServerController;
-import chat.server.view.ServerGUI;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
 public class ClientGUI extends JFrame implements ClientView {
-    public static final int WIDTH = 400;
-    public static final int HEIGHT = 400;
-
-    private final ServerController serverController;
-    private ClientController clientController;
-    private boolean isUserConnected = false;
-
-    private String userName;
-
-    private JPanel connectionPanel;
-
-    private JTextField textFieldIPaddress;
-    private JTextField textFieldPort;
+    private static final int WIDTH = 400, HEIGHT = 300;
+    private JTextArea log;
     private JTextField textFieldLogin;
-    private JPasswordField textFieldPassword;
-    private JButton buttonSend;
-    private JButton buttonUsers;
+    private JTextField textFieldMessage;
+    private JPanel headPanel;
+    private ClientController clientController;
 
-    private JPanel panelMessageLog;
-    private JTextField messageField;
-    private JButton buttonConnect;
-    private JTextArea areaLog = new JTextArea();
-
-    public ClientGUI(ServerController serverController) {
-        this.serverController = serverController;
-
-        setSize(WIDTH, HEIGHT);
-        setResizable(false);
-        setTitle("Chat client");
-
-        createView();
-        setLocationRelativeTo(null);
+    public ClientGUI() {
+        setting();
+        createPanel();
         setVisible(true);
     }
 
-    public void connectToServer() {
-        if (serverController.isWork) {
-            String log = serverController.log.read();
-            isUserConnected = true;
-            userName = textFieldLogin.getText();
-            connectionPanel.setVisible(false);
-            if (log != null) appendLog(log);
-            setTitle("Chat client - " + userName);
-            appendLog("Connected is successful!\n");
-        } else {
-            appendLog("Connection filed");
+    private void setting() {
+        setSize(WIDTH, HEIGHT);
+        setResizable(false);
+        setTitle("Chat client");
+        setDefaultCloseOperation(HIDE_ON_CLOSE);
+    }
+
+
+    public void disconnectServer() {
+        clientController.disconnectServer();
+    }
+
+    public void hideHeaderPanel(boolean isVisible) {
+        headPanel.setVisible(isVisible);
+    }
+
+    public void login() {
+        if (clientController.connectToServer(textFieldLogin.getText())) {
+            headPanel.setVisible(false);
         }
     }
 
-
-    public void disconnectFromServer() {
-        if (isUserConnected) {
-            this.connectionPanel.setVisible(true);
-            this.isUserConnected = false;
-            this.serverController.disconnectUser(clientController);
-            appendLog("Connection closed!");
-        }
+    private void message() {
+        clientController.message(textFieldMessage.getText());
+        textFieldMessage.setText("");
     }
 
-    public void sendMessage() {
-        if (isUserConnected && !messageField.getText().isEmpty()) {
-            serverController.showMessageInWindow(userName + ": " + messageField.getText());
-        } else {
-            appendLog("Not connection");
-        }
-        messageField.setText("");
+    private void createPanel() {
+        add(createHeaderPanel(), BorderLayout.NORTH);
+        add(createLog());
+        add(createFooter(), BorderLayout.SOUTH);
     }
 
-    private void showUsersOnline() {
-        if (isUserConnected) {
-//            server.
-        }
+    private Component createHeaderPanel() {
+        headPanel = new JPanel(new GridLayout(2, 3));
+        JTextField tfIPAddress = new JTextField("127.0.0.1");
+        JTextField tfPort = new JTextField("6655");
+        textFieldLogin = new JTextField("User");
+        JPasswordField password = new JPasswordField("666555333");
+        JButton btnLogin = new JButton("login");
+        btnLogin.addActionListener(e -> login());
+
+        headPanel.add(tfIPAddress);
+        headPanel.add(tfPort);
+        headPanel.add(new JPanel());
+        headPanel.add(textFieldLogin);
+        headPanel.add(password);
+        headPanel.add(btnLogin);
+
+        return headPanel;
     }
 
-    private void appendLog(String text) {
-        areaLog.append(text + "\n");
+    private Component createLog() {
+        log = new JTextArea();
+        log.setEditable(false);
+        return new JScrollPane(log);
     }
 
-    private void createView() {
-        add(createConnectionPanel(), BorderLayout.NORTH);
-        add(new JScrollPane(areaLog));
-        add(createPanelSendMessage(), BorderLayout.SOUTH);
-    }
-
-    private Component createConnectionPanel() {
-        JPanel left = new JPanel(new GridLayout(2, 1));
-        JPanel center = new JPanel(new GridLayout(2, 1));
-        JPanel right = new JPanel(new GridLayout(1, 1));
-        connectionPanel = new JPanel(new GridLayout(1, 2));
-
-        textFieldIPaddress = new JTextField("IP address");
-        textFieldPort = new JTextField("port");
-        textFieldLogin = new JTextField("Name");
-        textFieldPassword = new JPasswordField("password");
-        buttonConnect = new JButton("connect");
-
-        buttonConnect.addActionListener(new ActionListener() {
+    private Component createFooter() {
+        JPanel panel = new JPanel(new BorderLayout());
+        textFieldMessage = new JTextField();
+        textFieldMessage.addKeyListener(new SendKeyAdapter());
+        JButton btnSend = new JButton("send");
+        btnSend.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                connectToServer();
+                message();
             }
         });
-
-        left.add(textFieldIPaddress);
-        left.add(textFieldLogin);
-        center.add(textFieldPort);
-        center.add(textFieldPassword);
-        right.add(buttonConnect);
-        connectionPanel.add(left, BorderLayout.WEST);
-        connectionPanel.add(center, BorderLayout.CENTER);
-        connectionPanel.add(right, BorderLayout.EAST);
-
-        return connectionPanel;
-    }
-
-    private Component createPanelSendMessage() {
-        panelMessageLog = new JPanel(new BorderLayout());
-        messageField = new JTextField();
-        messageField.addKeyListener(new MyKeyAdapter());
-        buttonSend = new JButton("send");
-        buttonSend.addActionListener(actionEvent -> sendMessage());
-
-        buttonUsers = new JButton("Users online");
-        buttonUsers.addActionListener(actionEvent -> showUsersOnline());
-        panelMessageLog.add(messageField);
-        panelMessageLog.add(buttonSend, BorderLayout.EAST);
-        return panelMessageLog;
-    }
-
-    @Override
-    protected void processWindowEvent(WindowEvent windowEvent) {
-        if (windowEvent.getID() == WindowEvent.WINDOW_CLOSING) {
-            disconnectFromServer();
-        }
-        super.processWindowEvent(windowEvent);
+        panel.add(textFieldMessage);
+        panel.add(btnSend, BorderLayout.EAST);
+        return panel;
     }
 
     @Override
@@ -152,20 +101,28 @@ public class ClientGUI extends JFrame implements ClientView {
     }
 
     @Override
-    public void showMessage(String text) {
-        this.serverController.showMessageInWindow(text);
+    public void showMessage(String message) {
+        log.append(message);
     }
 
     @Override
-    public String getUserName() {
-        return userName;
+    public void disconnectedFromServer() {
+        hideHeaderPanel(true);
     }
 
-    private class MyKeyAdapter extends KeyAdapter {
+    @Override
+    protected void processWindowEvent(WindowEvent event) {
+        super.processWindowEvent(event);
+        if (event.getID() == WindowEvent.WINDOW_CLOSING) {
+            disconnectServer();
+        }
+    }
+
+    private class SendKeyAdapter extends KeyAdapter {
         @Override
-        public void keyTyped(KeyEvent keyEvent) {
-            if (keyEvent.getKeyChar() == '\n') {
-                sendMessage();
+        public void keyTyped(KeyEvent event) {
+            if (event.getKeyChar() == '\n') {
+                message();
             }
         }
     }

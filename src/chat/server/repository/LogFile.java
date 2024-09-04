@@ -1,31 +1,31 @@
 package chat.server.repository;
 
-import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 
 public class LogFile implements ILog {
-    private final String PATH_FOR_LOG = "src/chat/server/log.txt";
+    private static final String LOG_PATH = "src/chat/server/repository/log.log";
 
     @Override
-    public void write(String text) {
-        try (FileWriter writer = new FileWriter(PATH_FOR_LOG, true)) {
-            writer.write(text + "\n");
-        } catch (IOException exception) {
+    public void save(String text) {
+        try (FileWriter writer = new FileWriter(LOG_PATH, true)) {
+            writer.write(text);
+            writer.write("\n");
+        } catch (Exception exception) {
             System.out.println(exception.getMessage());
         }
     }
 
     @Override
-    public String read() {
+    public String load() {
         StringBuilder stringBuilder = new StringBuilder();
-        try (FileReader reader = new FileReader(PATH_FOR_LOG);) {
-            BufferedReader bufferedReader = new BufferedReader(reader);
-            String line;
-            while ((line = bufferedReader.readLine()) != null) stringBuilder.append(line).append("\n");
+        try (FileReader reader = new FileReader(LOG_PATH);) {
+            int ch;
+            while ((ch = reader.read()) != -1) {
+                stringBuilder.append((char) ch);
+            }
             return stringBuilder.toString();
-        } catch (IOException exception) {
+        } catch (Exception exception) {
             System.out.println(exception.getMessage());
             return null;
         }

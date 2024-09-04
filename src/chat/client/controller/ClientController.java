@@ -1,55 +1,83 @@
 package chat.client.controller;
 
-import chat.client.view.ClientGUI;
+
 import chat.client.view.ClientView;
 import chat.server.controller.ServerController;
-import chat.server.view.ServerGUI;
-import chat.server.view.ServerView;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class ClientController implements ClientView {
-
-    private static List<String> listUsers = new ArrayList<>();
-    private final ServerController serverController;
+public class ClientController {
+    private boolean connected;
+    private String name;
     private final ClientView clientView;
-    private ClientController clientController;
-    private boolean isConnected;
+    private final ServerController serverController;
 
-    public ClientController(ServerController serverController) {
+    public ClientController(ClientView clientView, ServerController serverController) {
+        this.clientView = clientView;
         this.serverController = serverController;
-        this.clientView = new ClientGUI(serverController);
+        clientView.setClientController(this);
     }
 
-    //for show active users (maybe)
-    public String getUsersOnline() {
-        StringBuilder users = new StringBuilder();
-        serverController.getUsersOnline().forEach(user -> users.append(user).append("\n"));
-        return users.toString();
+    public boolean connectToServer(String name) {
+        this.name = name;
+        if (serverController.connectUser(this)){
+            showOnWindow("You have successfully connected\n");
+            connected = true;
+            String log = serverController.getHistory();
+            if (log != null){
+                showOnWindow(log);
+            }
+            return true;
+        } else {
+            showOnWindow("Connection failed");
+            return false;
+        }
     }
 
-    @Override
-    public void setClientController(ClientController clientController) {
-        this.clientController = clientController;
+    public void answerFromServer(String text) {
+        showOnWindow(text);
     }
 
-    @Override
-    public void showMessage(String text) {
-        clientController.showMessage(text);
+    public void disconnectedFromServer() {
+        if (connected) {
+            connected = false;
+            clientView.disconnectedFromServer();
+            showOnWindow("You have been disconnected from the server");
+        }
     }
 
-    public void disconnectFromServer() {
+    /**
+     * Метод отключения от сервера инициализированное клиентом (например закрыто GUI)
+     */
+    public void disconnectServer() {
         serverController.disconnectUser(this);
     }
 
-    @Override
-    public void connectToServer() {
-        serverController.connectUser(this);
+    /**
+     * Метод для передачи сообщения на сервер
+     * @param text текст передаваемого сообщения
+     */
+    public void message(String text) {
+        if (connected) {
+            if (!text.isEmpty()) {
+                serverController.message(name + ": " + text);
+            }
+        } else {
+            showOnWindow("No connection to server");
+        }
     }
 
-    @Override
-    public String getUserName() {
-        return clientController.getUserName();
+    /**
+     * Геттер
+     * @return возвращает имя клиента
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Метод вывода сообщения на GUI
+     * @param text текст, который требуется вывести на экран
+     */
+    private void showOnWindow(String text) {
+        clientView.showMessage(text + "\n");
     }
 }

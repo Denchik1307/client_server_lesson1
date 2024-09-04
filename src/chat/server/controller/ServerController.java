@@ -1,76 +1,88 @@
 package chat.server.controller;
 
+
 import chat.client.controller.ClientController;
 import chat.server.repository.ILog;
-import chat.server.repository.LogFile;
-import chat.server.view.ServerGUI;
 import chat.server.view.ServerView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ServerController {
-
+    private boolean isWork;
     private final ServerView serverView;
+    private final List<ClientController> clientControllerList;
+    private final ILog log;
 
-    private String nameChat;
-    public boolean isWork = false;
-    public ILog log;
-    private final List<ClientController> listClientControllers;
-
-    public ServerController(String nameChat) {
-        this.log = new LogFile();
-        this.listClientControllers = new ArrayList<>();
-        this.nameChat = nameChat;
-        this.serverView = new ServerGUI(this);
-        this.serverView.setServerController(this);
-    }
-
-    public void disconnectUser(ClientController clientController) {
-        clientController.disconnectFromServer();
-    }
-
-    public void connectUser(ClientController clientController) {
-//        clientController.connectToServer();
-        this.listClientControllers.add(clientController);
-        showMessageInWindow(clientController.getUserName() + " connected");
-    }
-
-    public List<ClientController> getUsersOnline() {
-        return listClientControllers;
-    }
-
-    public void showMessageInWindow(String text) {
-        this.serverView.showMessage(text);
-        this.log.write(text);
+    public ServerController(ServerView serverView, ILog log) {
+        this.serverView = serverView;
+        this.log = log;
+        clientControllerList = new ArrayList<>();
+        serverView.setServerController(this);
     }
 
     public void start() {
-        if (isWork){
-            showMessageInWindow("Server still running");
+        if (isWork) {
+            showOnWindow("Server is already running");
         } else {
-            showMessageInWindow("Server run");
             isWork = true;
+            showOnWindow("Server run");
         }
     }
 
     public void stop() {
-        if (isWork){
-            isWork = false;
-            while (!listClientControllers.isEmpty()){
-                disconnectUser(listClientControllers.getLast());
-            }
-            showMessageInWindow("Server stop");
+        if (!isWork) {
+            showOnWindow(" Server isn`t run");
         } else {
-            showMessageInWindow("Server isn't run");
+            isWork = false;
+            while (!clientControllerList.isEmpty()) {
+                disconnectUser(clientControllerList.getLast());
+            }
+            showOnWindow(" Server stop");
         }
     }
 
-    public void addUser(ClientController clientController) {
-        listClientControllers.add(clientController);
+    public void disconnectUser(ClientController clientController) {
+        clientControllerList.remove(clientController);
+        if (clientController != null) {
+            clientController.disconnectedFromServer();
+            showOnWindow(clientController.getName() + " disconnected");
+        }
     }
 
-    public String getNameChat() {
-        return nameChat;
+    public boolean connectUser(ClientController clientController) {
+        if (!isWork) {
+            return false;
+        }
+        clientControllerList.add(clientController);
+        showOnWindow(clientController.getName() + " connected");
+        return true;
+    }
+
+    public void message(String text) {
+        if (!isWork) {
+            return;
+        }
+        showOnWindow(text);
+        answerAll(text);
+        saveInHistory(text);
+    }
+
+    public String getHistory() {
+        return log.load();
+    }
+
+    private void answerAll(String text) {
+        for (ClientController clientController : clientControllerList) {
+            clientController.answerFromServer(text);
+        }
+    }
+
+    private void showOnWindow(String text) {
+        serverView.showMessage(text + "\n");
+    }
+
+    private void saveInHistory(String text) {
+        log.save(text);
     }
 }

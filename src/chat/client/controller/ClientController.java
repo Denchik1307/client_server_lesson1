@@ -18,11 +18,11 @@ public class ClientController {
 
     public boolean connectToServer(String name) {
         this.name = name;
-        if (serverController.connectUser(this)){
+        if (serverController.connectUser(this)) {
             showOnWindow("You have successfully connected\n");
             connected = true;
             String log = serverController.getHistory();
-            if (log != null){
+            if (log != null) {
                 showOnWindow(log);
             }
             return true;
@@ -44,17 +44,10 @@ public class ClientController {
         }
     }
 
-    /**
-     * Метод отключения от сервера инициализированное клиентом (например закрыто GUI)
-     */
     public void disconnectServer() {
         serverController.disconnectUser(this);
     }
 
-    /**
-     * Метод для передачи сообщения на сервер
-     * @param text текст передаваемого сообщения
-     */
     public void message(String text) {
         if (connected) {
             if (!text.isEmpty()) {
@@ -65,18 +58,10 @@ public class ClientController {
         }
     }
 
-    /**
-     * Геттер
-     * @return возвращает имя клиента
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * Метод вывода сообщения на GUI
-     * @param text текст, который требуется вывести на экран
-     */
     private void showOnWindow(String text) {
         clientView.showMessage(text + "\n");
     }
